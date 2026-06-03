@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>어르신 두뇌 톡톡 벽돌깨기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Noto Sans KR", Arial, sans-serif;
+      background: #f7f3ea;
+      color: #222;
+      text-align: center;
+    }
+    header {
+      padding: 18px 10px 10px;
+      background: #fff7df;
+      border-bottom: 4px solid #d8b35a;
+    }
+    h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.25;
+    }
+    .subtitle {
+      font-size: 22px;
+      margin-top: 8px;
+    }
+    .wrap {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .panel {
+      background: white;
+      border: 3px solid #d8b35a;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    label {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    input, select {
+      font-size: 24px;
+      padding: 12px 14px;
+      border: 3px solid #aaa;
+      border-radius: 12px;
+      min-width: 220px;
+      background: #fff;
+    }
+    button {
+      font-size: 26px;
+      font-weight: bold;
+      padding: 14px 24px;
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      background: #4f7d3a;
+      color: white;
+      box-shadow: 0 4px 0 #315222;
+    }
+    button:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #315222;
+    }
+    button.secondary {
+      background: #6a6a6a;
+      box-shadow: 0 4px 0 #444;
+    }
+    button.danger {
+      background: #a94442;
+      box-shadow: 0 4px 0 #74302f;
+    }
+    .scorebar {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .scorebar span {
+      background: #fff;
+      border: 3px solid #ddd;
+      border-radius: 12px;
+      padding: 8px 14px;
+      min-width: 160px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 960px;
+      height: auto;
+      margin: 0 auto;
+      background: #fffdf6;
+      border: 6px solid #333;
+      border-radius: 18px;
+    }
+    .message {
+      font-size: 32px;
+      font-weight: bold;
+      min-height: 46px;
+      margin: 12px 0 6px;
+      color: #5b3a00;
+    }
+    .help {
+      font-size: 22px;
+      line-height: 1.55;
+      text-align: left;
+      max-width: 920px;
+      margin: 14px auto 0;
+      background: #fffbea;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 2px solid #ead28a;
+    }
+    table {
+      width: 100%;
+      max-width: 920px;
+      margin: 12px auto 0;
+      border-collapse: collapse;
+      font-size: 21px;
+      background: white;
+    }
+    th, td {
+      border: 2px solid #ddd;
+      padding: 10px;
+    }
+    th {
+      background: #fff1bc;
+    }
+    .small {
+      font-size: 18px;
+      color: #555;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>어르신 두뇌 톡톡 벽돌깨기</h1>
+    <div class="subtitle">데이케어센터 프로그램용 집중력·반응 활동 게임</div>
+  </header>
+
+  <div class="wrap">
+    <div class="panel">
+      <div class="row">
+        <label for="playerName">참여자 이름</label>
+        <input id="playerName" type="text" placeholder="예: 김OO 어르신" />
+        <label for="level">난이도</label>
+        <select id="level">
+          <option value="easy">쉬움</option>
+          <option value="normal">보통</option>
+          <option value="active">활기</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="startBtn">시작하기</button>
+        <button id="restartBtn" class="secondary">다시하기</button>
+        <button id="saveBtn">점수 저장</button>
+        <button id="clearBtn" class="danger">기록 지우기</button>
+      </div>
+      <div class="small">조작: 키보드 ← → 방향키 또는 마우스로 받침대를 움직이세요.</div>
+    </div>
+
+    <div class="scorebar">
+      <span>점수: <b id="score">0</b></span>
+      <span>남은 기회: <b id="lives">3</b></span>
+      <span>난이도: <b id="levelText">쉬움</b></span>
+    </div>
+
+    <canvas id="gameCanvas" width="960" height="560"></canvas>
+    <div class="message" id="message">이름과 난이도를 고른 뒤 시작하기를 눌러주세요.</div>
+
+    <div class="help">
+      <b>센터 사용 안내</b><br>
+      1. TV나 빔프로젝터에 연결하면 여러 어르신이 함께 보실 수 있습니다.<br>
+      2. 한 분씩 참여하거나, 팀별 응원 방식으로 진행해도 좋습니다.<br>
+      3. “치료” 표현보다는 “인지활동·여가활동 프로그램”으로 안내해 주세요.
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h2 style="font-size:30px; margin:0;">오늘의 참여 기록</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>이름</th>
+            <th>난이도</th>
+            <th>점수</th>
+          </tr>
+        </thead>
+        <tbody id="recordBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const playerName = document.getElementById("playerName");
+    const levelSelect = document.getElementById("level");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const scoreEl = document.getElementById("score");
+    const livesEl = document.getElementById("lives");
+    const levelTextEl = document.getElementById("levelText");
+    const messageEl = document.getElementById("message");
+    const recordBody = document.getElementById("recordBody");
+
+    let ballRadius = 12;
+    let x, y, dx, dy;
+    let paddleHeight = 18;
+    let paddleWidth = 170;
+    let paddleX;
+    let rightPressed = false;
+    let leftPressed = false;
+    let score = 0;
+    let lives = 3;
+    let isRunning = false;
+    let animationId = null;
+
+    let brickRowCount = 4;
+    let brickColumnCount = 7;
+    let brickWidth = 105;
+    let brickHeight = 34;
+    let brickPadding = 12;
+    let brickOffsetTop = 70;
+    let brickOffsetLeft = 72;
+    let bricks = [];
+
+    const levelInfo = {
+      easy:   { name: "쉬움", speed: 3.0, paddle: 190, rows: 3 },
+      normal: { name: "보통", speed: 3.8, paddle: 170, rows: 4 },
+      active: { name: "활기", speed: 4.6, paddle: 150, rows: 5 }
+    };
+
+    function setupGame() {
+      const level = levelInfo[levelSelect.value];
+      levelTextEl.textContent = level.name;
+      paddleWidth = level.paddle;
+      brickRowCount = level.rows;
+
+      x = canvas.width / 2;
+      y = canvas.height - 70;
+      dx = level.speed;
+      dy = -level.speed;
+      paddleX = (canvas.width - paddleWidth) / 2;
+      score = 0;
+      lives = 3;
+      scoreEl.textContent = score;
+      livesEl.textContent = lives;
+
+      bricks = [];
+      for (let c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for (let r = 0; r < brickRowCount; r++) {
+          bricks[c][r] = { x: 0, y: 0, status: 1 };
+        }
+      }
+
+      draw();
+    }
+
+    function drawBricks() {
+      for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+          if (bricks[c][r].status === 1) {
+            const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+            const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+            bricks[c][r].x = brickX;
+            bricks[c][r].y = brickY;
+
+            ctx.beginPath();
+            ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 8);
+            ctx.fillStyle = ["#f0b84a", "#8abf68", "#76a9d8", "#d98585", "#b28bd6"][r % 5];
+            ctx.fill();
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+          }
+        }
+      }
+    }
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "#333";
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawPaddle() {
+      ctx.beginPath();
+      ctx.roundRect(paddleX, canvas.height - paddleHeight - 22, paddleWidth, paddleHeight, 8);
+      ctx.fillStyle = "#4f7d3a";
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.font = "bold 22px Malgun Gothic";
+      ctx.fillStyle = "#333";
+      ctx.textAlign = "center";
+      ctx.fillText("받침대", paddleX + paddleWidth / 2, canvas.height - 48);
+    }
+
+    function drawCenterGuide() {
+      ctx.font = "bold 30px Malgun Gothic";
+      ctx.fillStyle = "#9a7b2f";
+      ctx.textAlign = "center";
+      if (!isRunning) {
+        ctx.fillText("시작하기를 누르면 공이 움직입니다", canvas.width / 2, canvas.height / 2 + 90);
+      }
+    }
+
+    function collisionDetection() {
+      for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+          const b = bricks[c][r];
+          if (b.status === 1) {
+            if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+              dy = -dy;
+              b.status = 0;
+              score += 10;
+              scoreEl.textContent = score;
+              messageEl.textContent = "좋습니다! 집중력이 아주 좋으세요.";
+              if (score === brickRowCount * brickColumnCount * 10) {
+                endGame("성공입니다! 정말 잘하셨어요.");
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#fffdf6";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawBricks();
+      drawBall();
+      drawPaddle();
+      drawCenterGuide();
+
+      if (!isRunning) return;
+
+      collisionDetection();
+
+      if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+      if (y + dy < ballRadius) {
+        dy = -dy;
+      } else if (y + dy > canvas.height - ballRadius - 34) {
+        if (x > paddleX && x < paddleX + paddleWidth) {
+          dy = -dy;
+          messageEl.textContent = "잘 받으셨어요!";
+        } else {
+          lives--;
+          livesEl.textContent = lives;
+          if (!lives) {
+            endGame("괜찮습니다. 다시 한 번 천천히 해볼까요?");
+            return;
+          } else {
+            messageEl.textContent = "괜찮아요. 남은 기회가 있습니다.";
+            const level = levelInfo[levelSelect.value];
+            x = canvas.width / 2;
+            y = canvas.height - 70;
+            dx = level.speed;
+            dy = -level.speed;
+            paddleX = (canvas.width - paddleWidth) / 2;
+          }
+        }
+      }
+
+      const moveAmount = 8;
+      if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += moveAmount;
+      if (leftPressed && paddleX > 0) paddleX -= moveAmount;
+
+      x += dx;
+      y += dy;
+      animationId = requestAnimationFrame(draw);
+    }
+
+    function startGame() {
+      cancelAnimationFrame(animationId);
+      setupGame();
+      isRunning = true;
+      messageEl.textContent = "천천히 움직이며 공을 받아보세요.";
+      draw();
+    }
+
+    function endGame(text) {
+      isRunning = false;
+      cancelAnimationFrame(animationId);
+      messageEl.textContent = text + " 점수를 저장해 주세요.";
+      draw();
+    }
+
+    function saveScore() {
+      const name = playerName.value.trim() || "참여자";
+      const level = levelInfo[levelSelect.value].name;
+      const now = new Date();
+      const dateText = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+
+      const records = JSON.parse(localStorage.getItem("daycareBrickRecords") || "[]");
+      records.unshift({ date: dateText, name, level, score });
+      localStorage.setItem("daycareBrickRecords", JSON.stringify(records.slice(0, 30)));
+      loadRecords();
+      messageEl.textContent = "점수가 저장되었습니다. 참 잘하셨습니다.";
+    }
+
+    function loadRecords() {
+      const records = JSON.parse(localStorage.getItem("daycareBrickRecords") || "[]");
+      recordBody.innerHTML = "";
+      records.forEach(rec => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${rec.date}</td><td>${rec.name}</td><td>${rec.level}</td><td>${rec.score}</td>`;
+        recordBody.appendChild(tr);
+      });
+    }
+
+    function clearRecords() {
+      if (confirm("저장된 참여 기록을 모두 지울까요?")) {
+        localStorage.removeItem("daycareBrickRecords");
+        loadRecords();
+        messageEl.textContent = "참여 기록을 지웠습니다.";
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+      if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+    });
+    document.addEventListener("keyup", e => {
+      if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+      if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+    });
+
+    canvas.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const relativeX = (e.clientX - rect.left) * scaleX;
+      if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+        if (paddleX < 0) paddleX = 0;
+        if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
+        if (!isRunning) draw();
+      }
+    });
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+    saveBtn.addEventListener("click", saveScore);
+    clearBtn.addEventListener("click", clearRecords);
+    levelSelect.addEventListener("change", setupGame);
+
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.lineTo(x + width - radius, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.lineTo(x + width, y + height - radius);
+        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.lineTo(x + radius, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.lineTo(x, y + radius);
+        this.quadraticCurveTo(x, y, x + radius, y);
+        this.closePath();
+      };
+    }
+
+    setupGame();
+    loadRecords();
+  </script>
+</body>
+</html>
