@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>어르신 두뇌 톡톡 벽돌깨기</title>
   <style>
     * { box-sizing: border-box; }
@@ -12,6 +12,9 @@
       background: #f7f3ea;
       color: #222;
       text-align: center;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
     }
     header {
       padding: 18px 10px 10px;
@@ -109,6 +112,7 @@
       background: #fffdf6;
       border: 6px solid #333;
       border-radius: 18px;
+      touch-action: none;
     }
     .message {
       font-size: 32px;
@@ -174,7 +178,7 @@
         <button id="saveBtn">점수 저장</button>
         <button id="clearBtn" class="danger">기록 지우기</button>
       </div>
-      <div class="small">조작: 키보드 ← → 방향키 또는 마우스로 받침대를 움직이세요.</div>
+      <div class="small">조작: 키보드 ← → 방향키, 마우스, 또는 터치로 받침대를 움직이세요.</div>
     </div>
 
     <div class="scorebar">
@@ -189,8 +193,9 @@
     <div class="help">
       <b>센터 사용 안내</b><br>
       1. TV나 빔프로젝터에 연결하면 여러 어르신이 함께 보실 수 있습니다.<br>
-      2. 한 분씩 참여하거나, 팀별 응원 방식으로 진행해도 좋습니다.<br>
-      3. “치료” 표현보다는 “인지활동·여가활동 프로그램”으로 안내해 주세요.
+      2. 터치 스크린 모니터나 태블릿에서는 손가락으로 직접 조작할 수 있습니다.<br>
+      3. 한 분씩 참여하거나, 팀별 응원 방식으로 진행해도 좋습니다.<br>
+      4. "치료" 표현보다는 "인지활동·여가활동 프로그램"으로 안내해 주세요.
     </div>
 
     <div class="panel" style="margin-top:16px;">
@@ -447,6 +452,7 @@
       }
     }
 
+    // 키보드 조작
     document.addEventListener("keydown", e => {
       if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
       if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
@@ -456,6 +462,7 @@
       if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
     });
 
+    // 마우스 조작
     canvas.addEventListener("mousemove", e => {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -467,6 +474,25 @@
         if (!isRunning) draw();
       }
     });
+
+    // 터치 조작 (터치스크린, 태블릿, 스마트폰용)
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const relativeX = (touch.clientX - rect.left) * scaleX;
+      if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+        if (paddleX < 0) paddleX = 0;
+        if (paddleX > canvas.width - paddleWidth) paddleX = canvas.width - paddleWidth;
+        if (!isRunning) draw();
+      }
+    }, { passive: false });
 
     startBtn.addEventListener("click", startGame);
     restartBtn.addEventListener("click", startGame);
