@@ -177,6 +177,13 @@
         <button id="restartBtn" class="secondary">다시하기</button>
         <button id="saveBtn">점수 저장</button>
         <button id="clearBtn" class="danger">기록 지우기</button>
+        <button onclick="voiceOn = true; speak('음성격려가 켜졌습니다');">
+🔊 음성격려 ON
+</button>
+
+<button onclick="voiceOn = false; speechSynthesis.cancel();">
+🔈 음성격려 OFF
+</button>
       </div>
       <div class="small">조작: 키보드 ← → 방향키, 마우스, 또는 터치로 받침대를 움직이세요.</div>
     </div>
@@ -346,6 +353,7 @@
               dy = -dy;
               b.status = 0;
               score += 10;
+            praise();
               scoreEl.textContent = score;
               messageEl.textContent = "좋습니다! 집중력이 아주 좋으세요.";
               if (score === brickRowCount * brickColumnCount * 10) {
@@ -499,7 +507,35 @@
     saveBtn.addEventListener("click", saveScore);
     clearBtn.addEventListener("click", clearRecords);
     levelSelect.addEventListener("change", setupGame);
+let voiceOn = true;
 
+function speak(text) {
+  if (!voiceOn) return;
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "ko-KR";
+  msg.rate = 0.9;
+  msg.pitch = 1;
+  msg.volume = 1;
+
+  window.speechSynthesis.speak(msg);
+}
+
+function praise() {
+  const words = [
+    "참 잘하셨어요",
+    "대단해요",
+    "멋져요",
+    "최고예요",
+    "훌륭합니다"
+  ];
+
+  const pick = words[Math.floor(Math.random() * words.length)];
+  speak(pick);
+}
     if (!CanvasRenderingContext2D.prototype.roundRect) {
       CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
         this.beginPath();
